@@ -1,39 +1,87 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff0f5">
   <title>Something Special ❤️</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div class="hearts" id="hearts"></div>
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
 
   <main class="card">
-    <div class="big-heart">❤️</div>
+    <div class="big-heart" aria-hidden="true">❤️</div>
 
     <p class="small-title">A LITTLE MESSAGE FOR YOU</p>
+
     <h1 id="heading">Hey, Someone Special! 💕</h1>
 
-    <p id="message">
+    <p class="message" id="message">
       Every moment feels more beautiful when you're around.
       I have something special to ask you...
     </p>
 
-    <div id="proposal" class="proposal" hidden>
-      <h2>Will you be mine? 💖</h2>
-      <p>Will you make my world more beautiful?</p>
-      <div class="buttons">
-        <button id="yesBtn">Yes! ❤️</button>
-        <button id="noBtn">No 🙈</button>
-      </div>
-    </div>
+    <button id="continueBtn" class="open-button" type="button">
+      Open My Heart 💌
+    </button>
 
-    <button id="continueBtn">Open My Heart 💌</button>
+    <form id="responseForm" hidden>
+      <h2>Will you be mine? 💖</h2>
+
+      <p class="form-description">
+        You can answer honestly. Your choice matters to me.
+      </p>
+
+      <label for="userName">Your name</label>
+      <input
+        id="userName"
+        name="user_name"
+        type="text"
+        maxlength="80"
+        placeholder="Enter your name"
+        autocomplete="name"
+        required
+      >
+
+      <label for="userMessage">A little message (optional)</label>
+      <textarea
+        id="userMessage"
+        name="message"
+        maxlength="1000"
+        placeholder="Write something from your heart..."
+        rows="3"
+      ></textarea>
+
+      <div class="buttons">
+        <button
+          type="submit"
+          class="yes"
+          data-answer="Yes ❤️"
+        >
+          Yes! ❤️
+        </button>
+
+        <button
+          type="submit"
+          class="no"
+          data-answer="No"
+        >
+          No 🙈
+        </button>
+      </div>
+
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+
     <p class="footer">Made with ❤️ just for you</p>
   </main>
 
+  <!-- EmailJS browser SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
+```
