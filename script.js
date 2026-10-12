@@ -1,27 +1,17 @@
+```javascript
+// ============================================
+// GOOGLE FORMS CONFIGURATION
+// Replace these placeholders with your own IDs.
+// ============================================
+
+const GOOGLE_FORM_ID = "YOUR_FORM_ID";
+
+const ENTRY_NAME = "entry.YOUR_NAME_ENTRY_ID";
+const ENTRY_ANSWER = "entry.YOUR_ANSWER_ENTRY_ID";
+const ENTRY_MESSAGE = "entry.YOUR_MESSAGE_ENTRY_ID";
 
 // ============================================
-// EMAILJS CONFIGURATION
-// Replace these 3 values with your own values.
-// ============================================
-
-const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
-const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
-
-// Initialize EmailJS only when configured.
-const emailConfigured =
-  EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY" &&
-  EMAILJS_SERVICE_ID !== "YOUR_SERVICE_ID" &&
-  EMAILJS_TEMPLATE_ID !== "YOUR_TEMPLATE_ID";
-
-if (emailConfigured && window.emailjs) {
-  emailjs.init({
-    publicKey: EMAILJS_PUBLIC_KEY
-  });
-}
-
-// ============================================
-// GET HTML ELEMENTS
+// GET EXISTING WEBSITE ELEMENTS
 // ============================================
 
 const heading = document.getElementById("heading");
@@ -33,11 +23,11 @@ const userMessage = document.getElementById("userMessage");
 const statusText = document.getElementById("status");
 const hearts = document.getElementById("hearts");
 
-// Remember which response the visitor selected.
 let selectedAnswer = "";
+let isSubmitting = false;
 
 // ============================================
-// OPEN THE PROPOSAL FORM
+// OPEN PROPOSAL FORM
 // ============================================
 
 continueBtn.addEventListener("click", () => {
@@ -54,7 +44,7 @@ continueBtn.addEventListener("click", () => {
 });
 
 // ============================================
-// HANDLE YES / NO SUBMISSION
+// RECORD WHICH ANSWER WAS CLICKED
 // ============================================
 
 responseForm.addEventListener("click", (event) => {
@@ -65,34 +55,67 @@ responseForm.addEventListener("click", (event) => {
   }
 });
 
-responseForm.addEventListener("submit", async (event) => {
+// ============================================
+// SUBMIT RESPONSE TO GOOGLE FORMS
+// ============================================
+
+responseForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
+  if (isSubmitting) return;
+
+  if (!responseForm.reportValidity()) return;
+
   if (!["Yes ❤️", "No"].includes(selectedAnswer)) {
-    statusText.textContent = "Please select Yes or No.";
+    statusText.textContent = "Please choose Yes or No.";
     return;
   }
 
-  if (!responseForm.reportValidity()) {
-    return;
-  }
-
-  if (!emailConfigured || !window.emailjs) {
+  if (
+    GOOGLE_FORM_ID === "YOUR_FORM_ID" ||
+    ENTRY_NAME.includes("YOUR_") ||
+    ENTRY_ANSWER.includes("YOUR_") ||
+    ENTRY_MESSAGE.includes("YOUR_")
+  ) {
     statusText.textContent =
-      "Email notifications are not configured yet. Please try again later.";
+      "Google Forms setup is incomplete. Please configure the form IDs.";
     return;
   }
 
   const answer = selectedAnswer;
+  const name = userName.value.trim();
+  const note = userMessage.value.trim();
 
-  const templateParams = {
-    user_name: userName.value.trim(),
-    proposal_response: answer,
-    message: userMessage.value.trim()
-  };
+  // Create a hidden iframe so the visitor stays on this website.
+  let frame = document.getElementById("googleFormFrame");
+
+  if (!frame) {
+    frame = document.createElement("iframe");
+    frame.name = "googleFormFrame";
+    frame.id = "googleFormFrame";
+    frame.hidden = true;
+    frame.title = "Google Forms submission";
+    document.body.appendChild(frame);
+  }
+
+  // Build a form that posts directly to Google Forms.
+  const googleForm = document.createElement("form");
+
+  googleForm.method = "POST";
+  googleForm.action =
+    `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`;
+  googleForm.target = "googleFormFrame";
+  googleForm.hidden = true;
+
+  addField(googleForm, ENTRY_NAME, name);
+  addField(googleForm, ENTRY_ANSWER, answer);
+  addField(googleForm, ENTRY_MESSAGE, note);
+
+  document.body.appendChild(googleForm);
+
+  isSubmitting = true;
 
   const buttons = responseForm.querySelectorAll("button");
-
   buttons.forEach((button) => {
     button.disabled = true;
   });
@@ -100,43 +123,59 @@ responseForm.addEventListener("submit", async (event) => {
   statusText.textContent = "Sending your response... 💌";
 
   try {
-    await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_TEMPLATE_ID,
-      templateParams
-    );
+    googleForm.submit();
+    googleForm.remove();
 
-    if (answer === "Yes ❤️") {
-      heading.textContent = "You Made Me So Happy! 💖";
+    // Cross-origin restrictions prevent this page from verifying
+    // Google's response. This is a submission attempt, not proof
+    // that Google accepted the response.
+    setTimeout(() => {
+      heading.textContent =
+        answer === "Yes ❤️"
+          ? "Thank You! 💖"
+          : "Thank You for Being Honest ❤️";
+
       message.textContent =
-        "Thank you for sharing this special moment with me! 🥰";
+        answer === "Yes ❤️"
+          ? "Thank you for sharing this special moment with me! 🥰"
+          : "Thank you for sharing your feelings. I respect your answer.";
 
-      createHearts(30);
-    } else {
-      heading.textContent = "Thank You for Being Honest ❤️";
-      message.textContent =
-        "Thank you for sharing your feelings. I respect your answer.";
+      responseForm.hidden = true;
+      continueBtn.hidden = true;
 
-      createHearts(5);
-    }
+      statusText.textContent =
+        "Your response was sent for submission. Thank you! ❤️";
 
-    responseForm.hidden = true;
-    continueBtn.hidden = true;
-    statusText.textContent = "";
+      createHearts(answer === "Yes ❤️" ? 25 : 5);
+    }, 1000);
   } catch (error) {
-    console.error("EmailJS error:", error);
+    console.error("Google Forms submission error:", error);
 
-    statusText.textContent =
-      "Sorry, your response could not be sent. Please try again later.";
+    googleForm.remove();
+    isSubmitting = false;
 
     buttons.forEach((button) => {
       button.disabled = false;
     });
+
+    statusText.textContent =
+      "Something went wrong. Please try again.";
   }
 });
 
+// Helper for adding Google Forms fields.
+function addField(form, fieldName, value) {
+  const input = document.createElement("input");
+
+  input.type = "hidden";
+  input.name = fieldName;
+  input.value = value;
+
+  form.appendChild(input);
+}
+
 // ============================================
-// FLOATING HEART ANIMATION
+// FLOATING HEARTS
 // ============================================
 
 function createHearts(count = 1) {
@@ -155,17 +194,11 @@ function createHearts(count = 1) {
 
     hearts.appendChild(heart);
 
-    heart.addEventListener("animationend", () => {
-      heart.remove();
-    });
+    heart.addEventListener("animationend", () => heart.remove());
   }
 }
 
-// Add floating hearts periodically.
-setInterval(() => {
-  createHearts(1);
-}, 1200);
+setInterval(() => createHearts(1), 1200);
 
-// Initial animation.
 createHearts(8);
-
+```
