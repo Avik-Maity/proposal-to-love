@@ -8,13 +8,11 @@
   <title>Something Special ❤️</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
   <div class="hearts" id="hearts" aria-hidden="true"></div>
 
   <main class="card">
     <div class="big-heart" aria-hidden="true">❤️</div>
-
     <p class="small-title">A LITTLE MESSAGE FOR YOU</p>
 
     <h1 id="heading">Hey, Someone Special! 💕</h1>
@@ -30,7 +28,6 @@
 
     <form id="responseForm" hidden>
       <h2>Will you be mine? 💖</h2>
-
       <p class="form-description">
         You can answer honestly. Your choice matters to me.
       </p>
@@ -51,24 +48,15 @@
         id="userMessage"
         name="message"
         maxlength="1000"
-        placeholder="Write something from your heart..."
         rows="3"
+        placeholder="Write something from your heart..."
       ></textarea>
 
       <div class="buttons">
-        <button
-          type="submit"
-          class="yes"
-          data-answer="Yes ❤️"
-        >
+        <button type="submit" class="yes" data-answer="Yes ❤️">
           Yes! ❤️
         </button>
-
-        <button
-          type="submit"
-          class="no"
-          data-answer="No"
-        >
+        <button type="submit" class="no" data-answer="No">
           No 🙈
         </button>
       </div>
@@ -79,9 +67,6 @@
     <p class="footer">Made with ❤️ just for you</p>
   </main>
 
-  <!-- EmailJS browser SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
-
