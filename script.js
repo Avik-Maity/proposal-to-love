@@ -1,18 +1,14 @@
-```javascript
-// ============================================
-// GOOGLE FORMS CONFIGURATION
-// Replace these placeholders with your own IDs.
-// ============================================
+
+/*
+  GOOGLE FORMS SETTINGS
+  Replace these placeholders with your real values.
+*/
 
 const GOOGLE_FORM_ID = "YOUR_FORM_ID";
 
 const ENTRY_NAME = "entry.YOUR_NAME_ENTRY_ID";
 const ENTRY_ANSWER = "entry.YOUR_ANSWER_ENTRY_ID";
 const ENTRY_MESSAGE = "entry.YOUR_MESSAGE_ENTRY_ID";
-
-// ============================================
-// GET EXISTING WEBSITE ELEMENTS
-// ============================================
 
 const heading = document.getElementById("heading");
 const message = document.getElementById("message");
@@ -23,16 +19,11 @@ const userMessage = document.getElementById("userMessage");
 const statusText = document.getElementById("status");
 const hearts = document.getElementById("hearts");
 
-let selectedAnswer = "";
 let isSubmitting = false;
 
-// ============================================
-// OPEN PROPOSAL FORM
-// ============================================
-
+// Open the proposal form.
 continueBtn.addEventListener("click", () => {
   heading.textContent = "You Make Me Smile! 💗";
-
   message.textContent =
     "There is something special I have wanted to ask you...";
 
@@ -43,22 +34,7 @@ continueBtn.addEventListener("click", () => {
   createHearts(8);
 });
 
-// ============================================
-// RECORD WHICH ANSWER WAS CLICKED
-// ============================================
-
-responseForm.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-answer]");
-
-  if (button) {
-    selectedAnswer = button.dataset.answer;
-  }
-});
-
-// ============================================
-// SUBMIT RESPONSE TO GOOGLE FORMS
-// ============================================
-
+// Submit a response to Google Forms.
 responseForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -66,45 +42,45 @@ responseForm.addEventListener("submit", (event) => {
 
   if (!responseForm.reportValidity()) return;
 
-  if (!["Yes ❤️", "No"].includes(selectedAnswer)) {
+  const answer = event.submitter?.dataset.answer;
+
+  if (!["Yes ❤️", "No"].includes(answer)) {
     statusText.textContent = "Please choose Yes or No.";
     return;
   }
 
-  if (
+  const placeholdersPresent =
     GOOGLE_FORM_ID === "YOUR_FORM_ID" ||
     ENTRY_NAME.includes("YOUR_") ||
     ENTRY_ANSWER.includes("YOUR_") ||
-    ENTRY_MESSAGE.includes("YOUR_")
-  ) {
+    ENTRY_MESSAGE.includes("YOUR_");
+
+  if (placeholdersPresent) {
     statusText.textContent =
-      "Google Forms setup is incomplete. Please configure the form IDs.";
+      "Setup incomplete: add your Google Form ID and entry IDs in script.js.";
     return;
   }
 
-  const answer = selectedAnswer;
   const name = userName.value.trim();
   const note = userMessage.value.trim();
 
-  // Create a hidden iframe so the visitor stays on this website.
+  // Create a hidden iframe to keep the visitor on this page.
   let frame = document.getElementById("googleFormFrame");
 
   if (!frame) {
     frame = document.createElement("iframe");
-    frame.name = "googleFormFrame";
     frame.id = "googleFormFrame";
+    frame.name = "googleFormFrame";
     frame.hidden = true;
-    frame.title = "Google Forms submission";
+    frame.title = "Google Forms response";
     document.body.appendChild(frame);
   }
 
-  // Build a form that posts directly to Google Forms.
   const googleForm = document.createElement("form");
-
   googleForm.method = "POST";
+  googleForm.target = frame.name;
   googleForm.action =
     `https://docs.google.com/forms/d/e/${GOOGLE_FORM_ID}/formResponse`;
-  googleForm.target = "googleFormFrame";
   googleForm.hidden = true;
 
   addField(googleForm, ENTRY_NAME, name);
@@ -120,16 +96,15 @@ responseForm.addEventListener("submit", (event) => {
     button.disabled = true;
   });
 
-  statusText.textContent = "Sending your response... 💌";
+  statusText.textContent = "Submitting your response... 💌";
 
   try {
     googleForm.submit();
     googleForm.remove();
 
-    // Cross-origin restrictions prevent this page from verifying
-    // Google's response. This is a submission attempt, not proof
-    // that Google accepted the response.
-    setTimeout(() => {
+    // The browser cannot verify Google's cross-origin response.
+    // This message confirms only that submission was attempted.
+    window.setTimeout(() => {
       heading.textContent =
         answer === "Yes ❤️"
           ? "Thank You! 💖"
@@ -144,10 +119,10 @@ responseForm.addEventListener("submit", (event) => {
       continueBtn.hidden = true;
 
       statusText.textContent =
-        "Your response was sent for submission. Thank you! ❤️";
+        "Submission attempted. Please verify the response in Google Forms.";
 
       createHearts(answer === "Yes ❤️" ? 25 : 5);
-    }, 1000);
+    }, 1200);
   } catch (error) {
     console.error("Google Forms submission error:", error);
 
@@ -159,46 +134,35 @@ responseForm.addEventListener("submit", (event) => {
     });
 
     statusText.textContent =
-      "Something went wrong. Please try again.";
+      "Could not submit. Please check your Google Form settings and try again.";
   }
 });
 
-// Helper for adding Google Forms fields.
-function addField(form, fieldName, value) {
+function addField(form, name, value) {
   const input = document.createElement("input");
-
   input.type = "hidden";
-  input.name = fieldName;
+  input.name = name;
   input.value = value;
-
   form.appendChild(input);
 }
 
-// ============================================
-// FLOATING HEARTS
-// ============================================
-
+// Floating hearts animation.
 function createHearts(count = 1) {
-  const heartTypes = ["❤️", "💕", "💖", "💗", "💘"];
+  const types = ["❤️", "💕", "💖", "💗", "💘"];
 
   for (let i = 0; i < count; i++) {
     const heart = document.createElement("span");
 
     heart.className = "floating-heart";
-    heart.textContent =
-      heartTypes[Math.floor(Math.random() * heartTypes.length)];
-
+    heart.textContent = types[Math.floor(Math.random() * types.length)];
     heart.style.left = Math.random() * 100 + "%";
     heart.style.fontSize = 16 + Math.random() * 22 + "px";
     heart.style.animationDuration = 3 + Math.random() * 4 + "s";
 
     hearts.appendChild(heart);
-
     heart.addEventListener("animationend", () => heart.remove());
   }
 }
 
-setInterval(() => createHearts(1), 1200);
-
+window.setInterval(() => createHearts(1), 1200);
 createHearts(8);
-```
