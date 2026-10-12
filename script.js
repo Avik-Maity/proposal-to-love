@@ -1,4 +1,4 @@
-```javascript
+
 // ============================================
 // EMAILJS CONFIGURATION
 // Replace these 3 values with your own values.
@@ -168,4 +168,4 @@ setInterval(() => {
 
 // Initial animation.
 createHearts(8);
-```
+
