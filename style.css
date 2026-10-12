@@ -317,6 +317,19 @@ h1 {
     font-size: 13px;
   }
 }
+#status {
+  margin-top: 16px;
+  color: #d52e68;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+#responseForm button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
